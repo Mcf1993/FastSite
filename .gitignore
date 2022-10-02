@@ -1,5 +1,5 @@
 venv
-alembic/versions
+alembic/versions/
 .env
 .idea/
 .idea/vcs.xml
