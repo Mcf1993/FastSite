@@ -1,0 +1,1 @@
+celery -A app.core.celery_config worker -l info
