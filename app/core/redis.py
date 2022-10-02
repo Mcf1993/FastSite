@@ -9,10 +9,10 @@ from typing import Any
 class RedisCls:
     def __init__(self):
         pool = redis.ConnectionPool(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
-        self.cli = redis.Redis(connection_pool=pool)
+        self.client = redis.Redis(connection_pool=pool)
 
     def set(self, key: str, value: Any, expired: int) -> None:
-        self.cli.set(key, value, expired)
+        self.client.set(key, value, expired)
 
     def get(self, key: str) -> Any:
-        return self.cli.get(key)
+        return self.client.get(key)
