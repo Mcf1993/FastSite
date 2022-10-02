@@ -1,0 +1,5 @@
+venv
+alembic/versions
+.env
+.idea/
+.idea/vcs.xml
