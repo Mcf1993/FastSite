@@ -12,7 +12,7 @@ app = Celery(
     'fastsite-celery',
     broker=os.getenv('CELERY_BROKER_URL'),
     result_backend=os.getenv('CELERY_RESULT_BACKEND'),
-    include=['app.tasks.default']
+    include=['app.tasks.celery_default']
 )
 
 
