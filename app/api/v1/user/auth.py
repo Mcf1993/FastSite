@@ -2,7 +2,8 @@ from app.core.auth import create_user_token, authenticate_user, password_hash, v
 from app.core.response import response, BaseResponse
 from app.curd.auth.permission import permissionCURD
 from app.curd.auth.user import user_curd
-from app.schemas.auth.user import UserInstance, UserRegister, UserCreate, LoginResponse
+from app.libs.image_captcha import ImageCaptchaCls
+from app.schemas.auth.user import UserInstance, UserRegister, UserCreate, LoginResponse, CaptchaResponse
 from app.schemas.auth.permission import PermissionBase
 from datetime import datetime
 from fastapi import APIRouter, Request, Depends, Security
@@ -37,7 +38,7 @@ async def user_login(request: Request, payload: OAuth2PasswordRequestForm = Depe
     return {"access_token": create_user_token(payload), "token_type": "bearer"}
 
 
-@auth_router.post('user/register/', summary='会员注册', response_model=BaseResponse)
+@auth_router.post('/user/register/', summary='会员注册', response_model=BaseResponse)
 async def user_register(request: Request, payload: UserRegister):
     user_instance = user_curd.get_user_instance_by_username(request.state.db, payload.username)
     if user_instance is not None:
@@ -57,8 +58,17 @@ async def user_register(request: Request, payload: UserRegister):
     return response()
 
 
-@auth_router.get('permission/list/', summary="获取所有权限", response_model=BaseResponse[List[PermissionBase]],
+@auth_router.get('/permission/list/', summary="获取所有权限", response_model=BaseResponse[List[PermissionBase]],
                  dependencies=[Security(authenticate_user, )])
 async def get_permission_list(request: Request):
     all_permission = permissionCURD.get_all(request.state.db)
     return response(data=jsonable_encoder(all_permission))
+
+
+@auth_router.get('/captcha/', summary="获取验证码", response_model=BaseResponse[CaptchaResponse])
+async def get_captcha_img():
+    hash_key, image_base64 = ImageCaptchaCls().generate_image()
+    return response(data={
+        'hash_key': hash_key,
+        'image_base64': image_base64
+    })

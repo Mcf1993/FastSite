@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+import base64
+from pydantic import BaseModel, Field
 
 
 class UserInstance(BaseModel):
@@ -20,11 +21,21 @@ class UserCreate(BaseModel):
 
 class UserRegister(BaseModel):
     username: str
-    password: str
+    password: str = Field(
+        max_length=4
+    )
+    confirm_password: str = Field(
+        max_length=4,
+    )
     email: str
 
 
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
+
+
+class CaptchaResponse(BaseModel):
+    hash_key: str
+    image_base64: str
 
