@@ -1,5 +1,6 @@
-from app.core.auth import create_user_token, authenticate_user, password_hash, verify_password
+from app.core.auth import create_user_token, authenticate_user, password_hash, verify_password, OAuth2Form
 from app.core.response import response, BaseResponse
+from app.core.redis import RedisCls
 from app.curd.auth.permission import permissionCURD
 from app.curd.auth.user import user_curd
 from app.libs.image_captcha import ImageCaptchaCls
@@ -8,8 +9,7 @@ from app.schemas.auth.permission import PermissionBase
 from datetime import datetime
 from fastapi import APIRouter, Request, Depends, Security
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import OAuth2PasswordRequestForm
-from typing import List
+from typing import List, Union
 
 auth_router = APIRouter(prefix='/auth')
 
@@ -28,8 +28,16 @@ async def get_user_instance(request: Request, user_id: int):
     return response(data=jsonable_encoder(user_instance))
 
 
-@auth_router.post('/user/login/', summary="用户登录", response_model=LoginResponse)
-async def user_login(request: Request, payload: OAuth2PasswordRequestForm = Depends()):
+@auth_router.post('/user/login/', summary="用户登录", response_model=Union[LoginResponse, BaseResponse])
+async def user_login(request: Request, payload: OAuth2Form = Depends()):
+    redis_cls = RedisCls()
+    captcha_data = redis_cls.get(payload.hash_key)
+    if captcha_data is None:
+        return response(code=4004, message='验证码已过期')
+    if isinstance(captcha_data, bytes):
+        captcha_data = captcha_data.decode()
+    if captcha_data.upper() != payload.verify_code.upper():
+        return response(code=4004, message="验证码错误")
     user_instance = user_curd.get_user_instance_by_username(request.state.db, payload.username)
     if user_instance is None:
         return response(code=4004, message="用户未注册")

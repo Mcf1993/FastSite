@@ -7,12 +7,13 @@ from io import BytesIO
 
 from app.core.redis import RedisCls
 from captcha.image import ImageCaptcha
+from typing import Tuple
 
 
 class ImageCaptchaCls:
     CAPTCHA_SECRET_KEY = 'y7JntUWjDUNDrH+BSeV57w=='
 
-    def _get_random_str(self):
+    def _get_random_str(self) -> Tuple[str, str]:
         random_str = ''.join(random.sample(string.ascii_letters + string.digits, 4))
         m = hashlib.sha256()
         m.update(
@@ -21,7 +22,8 @@ class ImageCaptchaCls:
         hash_key = m.hexdigest()
         return random_str, hash_key
 
-    def _image_to_base64(self, image_io: BytesIO):
+    @classmethod
+    def _image_to_base64(cls, image_io: BytesIO):
         image_base64 = base64.b64encode(image_io.read()).decode()
         return image_base64
 
