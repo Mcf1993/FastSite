@@ -1,4 +1,3 @@
-import base64
 from pydantic import BaseModel, Field
 
 
@@ -22,10 +21,12 @@ class UserCreate(BaseModel):
 class UserRegister(BaseModel):
     username: str
     password: str = Field(
-        max_length=4
+        min_length=6,
+        max_length=32
     )
     confirm_password: str = Field(
-        max_length=4,
+        min_length=6,
+        max_length=32,
     )
     email: str
 
